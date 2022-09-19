@@ -15,6 +15,9 @@ class MainDriver(webdriver.Chrome):
 
         super().__init__(service=self.service, options=self.options)
 
+    def go_to_url(self, url) -> None:
+        self.get(url)
+
     def closeDriver(self) -> None:
         print('Finishing main loop...')
         self.quit()

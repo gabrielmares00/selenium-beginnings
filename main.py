@@ -1,43 +1,53 @@
-import time
+import os
 from ast import main
 
+from definitions import driver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-import driver
+import test_main
 
 
 def main():
+    options = [1, 2, 3]
     try:
         testExercise = int(
             input(
                 "Select test:\n" +
                 "1) Show maintaned python versions\n" +
                 "2) Verify decorators example count\n" +
-                "3) Verify if X.X.number release exists for latest version\n"
+                "3) Run tests on ToolsQA\n"
                 "Input: "
             )
         )
+
+        if testExercise not in options:
+            raise AttributeError
+    except AttributeError as exception:
+        print("Input one of the following: {}".format([option for option in options]))
+        os._exit(1)
     finally:
         mainDriver = driver.MainDriver()
 
         mainDriver.implicitly_wait(20)
-        mainDriver.get('https://www.python.org/')
 
         mainActioner = driver.MainActioner(mainDriver)
 
         match testExercise:
             case 1:
-                exercise1(mainDriver=mainDriver, mainActioner=mainActioner)
+                mainDriver.go_to_url('https://www.python.org/')
+                maintained_versions(mainDriver=mainDriver, mainActioner=mainActioner)
             case 2:
-                exercise2(mainDriver=mainDriver)
+                mainDriver.go_to_url('https://www.python.org/')
+                check_decorators_examples_count(mainDriver=mainDriver)
             case 3:
-                exercise3(mainDriver=mainDriver)
+                mainDriver.go_to_url('https://demoqa.com/text-box')
+                tests_demoqa(mainDriver=mainDriver)
             case _:
                 pass
 
 
-def exercise1(mainDriver: driver.MainDriver, mainActioner: driver.MainActioner):
+def maintained_versions(mainDriver: driver.MainDriver, mainActioner: driver.MainActioner):
     '''
     Initial attempt -> cannot interact with the release a element, need to use other search method?
 
@@ -116,7 +126,7 @@ def exercise1(mainDriver: driver.MainDriver, mainActioner: driver.MainActioner):
     mainDriver.checkDriverStatus()
 
 
-def exercise2(mainDriver: driver.MainDriver):
+def check_decorators_examples_count(mainDriver: driver.MainDriver):
     searchBar = mainDriver.find_element(By.XPATH, "//*[@id='id-search-field']")
 
     # Fun fact: La un moment dat cand scriam la exercitiul asta, o picat search-ul de la python :D
@@ -143,8 +153,8 @@ def exercise2(mainDriver: driver.MainDriver):
     mainDriver.checkDriverStatus()
 
 
-def exercise3(mainDriver: driver.MainDriver):
-    print('SoonTM')
+def tests_demoqa(mainDriver: driver.MainDriver):
+    test_main.start_tests(mainDriver)
 
     mainDriver.closeDriver()
     mainDriver.checkDriverStatus()
