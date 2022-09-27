@@ -41,8 +41,7 @@ def main():
                 mainDriver.go_to_url('https://www.python.org/')
                 check_decorators_examples_count(mainDriver=mainDriver)
             case 3:
-                mainDriver.go_to_url('https://demoqa.com/text-box')
-                tests_demoqa(mainDriver=mainDriver)
+                tests_demoqa(mainDriver=mainDriver, mainActioner=mainActioner)
             case _:
                 pass
 
@@ -153,8 +152,8 @@ def check_decorators_examples_count(mainDriver: driver.MainDriver):
     mainDriver.checkDriverStatus()
 
 
-def tests_demoqa(mainDriver: driver.MainDriver):
-    test_main.start_tests(mainDriver)
+def tests_demoqa(mainDriver: driver.MainDriver, mainActioner: driver.MainActioner):
+    test_main.start_tests(mainDriver, mainActioner)
 
     mainDriver.closeDriver()
     mainDriver.checkDriverStatus()

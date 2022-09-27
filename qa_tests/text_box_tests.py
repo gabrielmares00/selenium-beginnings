@@ -1,5 +1,6 @@
 import time
 from typing import List
+
 from definitions import driver, elements
 from selenium.webdriver.common.by import By
 
@@ -12,16 +13,16 @@ def reset_fields(text_fields: List[elements.TextBox]):
 
 
 def text_box_tests_entry_point(mainDriver: driver.MainDriver):
-    container = elements.Div(utils.tools_qa_text_box_get_container(mainDriver))
+    container = elements.Div(utils.tools_qa_get_container(mainDriver, 'text-field-container'))
 
-    input_elements = container.find_elements('tag_name', 'input')
-    print([element.get_attribute('placeholder') for element in input_elements])
+    input_elements = utils.find_elements(container.get_inner_element(), 'tag_name', 'input')
+    # print([element.get_attribute('placeholder') for element in input_elements])
 
     name_field = elements.TextBox(input_elements[0])
     email_field = elements.TextBox(input_elements[1])
 
-    text_area_elements = container.find_elements('tag_name', 'textarea')
-    print([element.get_attribute('placeholder') for element in text_area_elements])
+    text_area_elements = utils.find_elements(container.get_inner_element(), 'tag_name', 'textarea')
+    # print([element.get_attribute('placeholder') for element in text_area_elements])
 
     current_adress_field = elements.TextBox(text_area_elements[0])
     permanent_adress_field = elements.TextBox(text_area_elements[1])
@@ -42,10 +43,8 @@ def text_box_tests_entry_point(mainDriver: driver.MainDriver):
         reset_fields(text_fields)
     print('Done!')
 
-    # email_field_correct_input(context=container, email_field=email_field, submit_button=submit_button)
-
-    submit_button = elements.Button(container.find_element('xpath', 'button', id='submit'))
-    output_div = elements.Div(container.find_element('xpath', 'div', id='output'))
+    submit_button = elements.Button(utils.find_element(container.get_inner_element(), 'xpath', 'button', id='submit'))
+    output_div = elements.Div(utils.find_element(container.get_inner_element(), 'xpath', 'div', id='output'))
 
     # https://gist.github.com/cjaoude/fd9910626629b53c4d25
     valid_emails = [
@@ -98,6 +97,7 @@ def text_box_tests_entry_point(mainDriver: driver.MainDriver):
         reset_fields(text_fields)
     print('Done!')
 
+
 def check_if_text_box_is_empty(text_field: elements.TextBox):
     assert text_field.get_text() == ""
 
@@ -127,8 +127,9 @@ def email_field_valid_input(
     email_field.set_text(email_to_validate)
     submit_button.click()
 
-    email_result = output_div.find_element('tag_name', 'p')
+    email_result = utils.find_element(output_div.get_inner_element(), 'tag_name', 'p')
     assert email_result.get_attribute('innerHTML') == "Email:{}".format(email_to_validate)
+
 
 def email_field_invalid_input(
         email_field: elements.TextBox,
@@ -138,10 +139,3 @@ def email_field_invalid_input(
     submit_button.click()
 
     assert 'field-error' in email_field.get_attribute('class')
-
-'''
-In caz ca uit sa intreb si vezi asta la review,
-nu stiu cum consideri tu, da' eu nu vad rostul sa testez restul de fields
-Deoarece primesc ca input orice, incluzand numere si simboluri, si chiar si empty fields (site-ul goleste acele
-entry-uri daca primeste empty strings)
-'''
