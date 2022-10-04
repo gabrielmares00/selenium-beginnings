@@ -4,7 +4,7 @@ from typing import List
 from definitions import driver, elements
 from selenium.webdriver.common.by import By
 
-import utils
+from utils import whole_document_element_finder as everywhere
 
 
 def reset_fields(text_fields: List[elements.TextBox]):
@@ -13,15 +13,15 @@ def reset_fields(text_fields: List[elements.TextBox]):
 
 
 def text_box_tests_entry_point(mainDriver: driver.MainDriver):
-    container = elements.Div(utils.tools_qa_get_container(mainDriver, 'text-field-container'))
+    container = elements.Div(everywhere.tools_qa_get_container(mainDriver, 'text-field-container'))
 
-    input_elements = utils.find_elements(container.get_inner_element(), 'tag_name', 'input')
+    input_elements = everywhere.find_elements(container.get_inner_element(), 'tag_name', 'input')
     # print([element.get_attribute('placeholder') for element in input_elements])
 
     name_field = elements.TextBox(input_elements[0])
     email_field = elements.TextBox(input_elements[1])
 
-    text_area_elements = utils.find_elements(container.get_inner_element(), 'tag_name', 'textarea')
+    text_area_elements = everywhere.find_elements(container.get_inner_element(), 'tag_name', 'textarea')
     # print([element.get_attribute('placeholder') for element in text_area_elements])
 
     current_adress_field = elements.TextBox(text_area_elements[0])
@@ -43,8 +43,10 @@ def text_box_tests_entry_point(mainDriver: driver.MainDriver):
         reset_fields(text_fields)
     print('Done!')
 
-    submit_button = elements.Button(utils.find_element(container.get_inner_element(), 'xpath', 'button', id='submit'))
-    output_div = elements.Div(utils.find_element(container.get_inner_element(), 'xpath', 'div', id='output'))
+    submit_button = elements.Button(
+        everywhere.find_element(container.get_inner_element(), 'xpath', 'button', id='submit'))
+    output_div = elements.Div(
+        everywhere.find_element(container.get_inner_element(), 'xpath', 'div', id='output'))
 
     # https://gist.github.com/cjaoude/fd9910626629b53c4d25
     valid_emails = [
@@ -127,7 +129,7 @@ def email_field_valid_input(
     email_field.set_text(email_to_validate)
     submit_button.click()
 
-    email_result = utils.find_element(output_div.get_inner_element(), 'tag_name', 'p')
+    email_result = everywhere.find_element(output_div.get_inner_element(), 'tag_name', 'p')
     assert email_result.get_attribute('innerHTML') == "Email:{}".format(email_to_validate)
 
 
