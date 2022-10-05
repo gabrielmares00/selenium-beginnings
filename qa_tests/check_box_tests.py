@@ -28,6 +28,7 @@ from definitions import driver, elements
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from time import sleep
 from qa_tests.check_box_classes.file import File
 from qa_tests.check_box_classes.folder import Folder
 
@@ -97,6 +98,24 @@ def _extract_result_text(context: WebElement):
     result_text = ' '.join(result_text_extracted)
     return result_text
 
+
+def _reset_home_selection(context: WebElement):
+    initial_folder_entry = _generate_initial_folder(context)[0]
+
+    initial_folder_entry_checkbox = initial_folder_entry.find_element(
+        By.XPATH,
+        ".//span[contains(@class, 'rct-checkbox')]/*[name()='svg']"
+    )
+    folder_checkbox_status = initial_folder_entry_checkbox.get_attribute('class')
+
+    if 'rct-icon-check' in folder_checkbox_status:
+        initial_folder_entry.click()
+    elif 'rct-icon-half-check' in folder_checkbox_status:
+        initial_folder_entry.click()
+        sleep(1)
+        initial_folder_entry.click()
+
+
 def check_box_tests_entry_point(driver: driver.MainDriver, actioner: driver.MainActioner):
     container = elements.Div(everywhere.tools_qa_get_container(
         driver, 'check-box-tree-wrapper'))
@@ -139,7 +158,13 @@ def check_box_tests_entry_point(driver: driver.MainDriver, actioner: driver.Main
     reset_context_collapse_all(collapse_all_button)
 
     check_selected_just_root(context=container)
+    _reset_home_selection(context=container)
+
+    check_selected_subfolderfolder_selected(context=container)
     reset_context_collapse_all(collapse_all_button)
+    _reset_home_selection(context=container)
+
+    check_selected_file_selected(context=container)
     print('Done!')
 
 
@@ -326,12 +351,14 @@ def check_selected_just_root(context: elements.Div):
 
 def check_selected_subfolderfolder_selected(context: elements.Div):
     initial_folder_entry = _generate_initial_folder(context)[0]
-    root_subfolders = _get_folder_children(initial_folder_entry)
+    initial_folder_toggle = everywhere.find_element(initial_folder_entry, 'xpath', 'button', class_name='rct-collapse')
+    initial_folder_toggle.click()
 
+    root_subfolders = _get_folder_children(initial_folder_entry)
     downloads_folder = root_subfolders[2]
     downloads_folder.click()
 
-    downloads_folder_checkbox = downloads_folder_checkbox.find_element(
+    downloads_folder_checkbox = downloads_folder.find_element(
         By.XPATH,
         ".//span[contains(@class, 'rct-checkbox')]/*[name()='svg']"
     )
@@ -355,6 +382,47 @@ def check_selected_subfolderfolder_selected(context: elements.Div):
     assert 'rct-icon-half-check' in initial_folder_entry_checkbox.get_attribute('class')
 
     expected_result = 'downloads wordFile excelFile'
+    result = _extract_result_text(context=context)
+
+    assert expected_result == result
+
+
+def check_selected_file_selected(context: elements.Div):
+    initial_folder_entry = _generate_initial_folder(context)[0]
+    initial_folder_toggle = everywhere.find_element(initial_folder_entry, 'xpath', 'button', class_name='rct-collapse')
+    initial_folder_toggle.click()
+
+    root_subfolders = _get_folder_children(initial_folder_entry)
+    downloads_folder = root_subfolders[2]
+    downloads_folder_toggle = everywhere.find_element(downloads_folder, 'xpath', 'button', class_name='rct-collapse')
+    downloads_folder_toggle.click()
+
+    download_files = _get_folder_children(downloads_folder)
+    excel_file = download_files[1]
+    excel_file.click()
+
+    excel_file_checkbox = excel_file.find_element(
+        By.XPATH,
+        ".//span[contains(@class, 'rct-checkbox')]/*[name()='svg']"
+    )
+
+    assert 'rct-icon-check' in excel_file_checkbox.get_attribute('class')
+    
+    downloads_folder_checkbox = downloads_folder.find_element(
+        By.XPATH,
+        ".//span[contains(@class, 'rct-checkbox')]/*[name()='svg']"
+    )
+
+    assert 'rct-icon-half-check' in downloads_folder_checkbox.get_attribute('class')
+
+    initial_folder_entry_checkbox = initial_folder_entry.find_element(
+        By.XPATH,
+        ".//span[contains(@class, 'rct-checkbox')]/*[name()='svg']"
+    )
+
+    assert 'rct-icon-half-check' in initial_folder_entry_checkbox.get_attribute('class')
+
+    expected_result = 'excelFile'
     result = _extract_result_text(context=context)
 
     assert expected_result == result
